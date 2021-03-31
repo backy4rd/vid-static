@@ -1,2 +1,11 @@
-vendor
-media
+vendor/
+media/
+static/*
+!static/photos/
+!static/photos/default-banner.png
+!static/photos/default-avatar.png
+!static/photos/default-icon.png
+!static/thumbnails/
+!static/thumbnails/.gitkeep
+!static/videos/
+!static/videos/.gitkeep
