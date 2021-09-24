@@ -1,10 +1,5 @@
 vendor/
+static/
 media/
-static/*
-!static/photos/default-banner.png
-!static/photos/default-avatar.png
-!static/photos/default-icon.png
-!static/thumbnails/.gitkeep
-!static/videos/.gitkeep
 temp/*
 !temp/.gitkeep

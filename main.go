@@ -10,8 +10,24 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func makeStaticFolders() {
+    err := os.MkdirAll("./static/photos", 0777)
+    if err != nil {
+        panic("make static folders getting error")
+    }
+    err = os.MkdirAll("./static/thumbnails", 0777)
+    if err != nil {
+        panic("make static folders getting error")
+    }
+    err = os.MkdirAll("./static/videos", 0777)
+    if err != nil {
+        panic("make static folders getting error")
+    }
+}
+
 func main() {
     rand.Seed(time.Now().UnixNano())
+    makeStaticFolders()
     router := gin.New()
 
     router.POST("/avatars", handler.UploadAvatarHandler)
