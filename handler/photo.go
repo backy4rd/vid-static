@@ -5,7 +5,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/backy4rd/zootube-static-server/util"
+	"github.com/backy4rd/zootube-media/util"
 
 	"github.com/disintegration/imaging"
 	"github.com/gin-gonic/gin"

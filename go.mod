@@ -1,4 +1,4 @@
-module github.com/backy4rd/zootube-static-server
+module github.com/backy4rd/zootube-media
 
 go 1.16
 

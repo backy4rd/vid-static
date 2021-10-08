@@ -5,7 +5,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/backy4rd/zootube-static-server/handler"
+	"github.com/backy4rd/zootube-media/handler"
 
 	"github.com/gin-gonic/gin"
 )

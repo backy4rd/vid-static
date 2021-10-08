@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/backy4rd/zootube-static-server/util"
+	"github.com/backy4rd/zootube-media/util"
 
 	"github.com/gin-gonic/gin"
 )
