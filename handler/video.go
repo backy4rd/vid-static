@@ -1,15 +1,15 @@
 package handler
 
 import (
-    "net/http"
-    "os"
-    "strconv"
-    "strings"
-    "time"
+	"net/http"
+	"os"
+	"strconv"
+	"strings"
+	"time"
 
-    "github.com/backy4rd/zootube-media/util"
+	"github.com/backy4rd/zootube-media/util"
 
-    "github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin"
 )
 
 var acceptedVideoExtensions = []string { "mp4", "mkv", "webm" }
@@ -69,6 +69,15 @@ func ProcessVideoHandler(c *gin.Context) {
         util.SendFailMessage(c, "missing parameters");
         return
     }
+    duration, err := util.GetVideoDuration("./temp/" + _video);
+    if err != nil {
+        util.SendFailMessage(c, "video not found");
+        return
+    }
+    if seek > duration {
+        util.SendFailMessage(c, "seek cannot greater than video duration");
+        return
+    }
     err = os.Rename("./temp/" + _video, "./static/videos/" + _video);
     if err != nil {
         util.SendFailMessage(c, "video not found");
@@ -79,10 +88,12 @@ func ProcessVideoHandler(c *gin.Context) {
     thumbnailPath := "./static/thumbnails/" + thumbnailFilename
     util.ExtractFrame("./static/videos/" + _video, seek, thumbnailHeight, thumbnailPath)
 
+
     c.JSON(http.StatusOK, gin.H{
         "data": gin.H{
             "videoPath": "/videos/" + _video,
             "thumbnailPath": "/thumbnails/" + thumbnailFilename,
+            "duration": duration,
         },
     })
 }
