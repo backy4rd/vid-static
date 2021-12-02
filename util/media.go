@@ -3,10 +3,11 @@ package util
 import (
 	"bytes"
 	"errors"
+	"io"
 	"os"
 	"os/exec"
-    "strings"
 	"strconv"
+	"strings"
 )
 
 func ExtractFrame(filePath string, seek int, height int, dest string) error {
@@ -58,4 +59,33 @@ func GetVideoDuration(filePath string) (int, error) {
     }
 
     return int(duration), nil
+}
+
+/*
+   GoLang: os.Rename() give error "invalid cross-device link" for Docker container with Volumes.
+   MoveFile(source, destination) will work moving file between folders
+*/
+
+func MoveFile(sourcePath, destPath string) error {
+    inputFile, err := os.Open(sourcePath)
+    if err != nil {
+        return err
+    }
+    outputFile, err := os.Create(destPath)
+    if err != nil {
+        inputFile.Close()
+        return err
+    }
+    defer outputFile.Close()
+    _, err = io.Copy(outputFile, inputFile)
+    inputFile.Close()
+    if err != nil {
+        return err
+    }
+    // The copy was successful, so now delete the original file
+    err = os.Remove(sourcePath)
+    if err != nil {
+        return err
+    }
+    return nil
 }

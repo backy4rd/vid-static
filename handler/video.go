@@ -78,7 +78,7 @@ func ProcessVideoHandler(c *gin.Context) {
         util.SendFailMessage(c, "seek cannot greater than video duration");
         return
     }
-    err = os.Rename("./temp/" + _video, "./static/videos/" + _video);
+    err = util.MoveFile("./temp/" + _video, "./static/videos/" + _video);
     if err != nil {
         util.SendFailMessage(c, "video not found");
         return
