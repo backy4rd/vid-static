@@ -1,9 +1,9 @@
 package util
 
 import (
-	"errors"
-	"math/rand"
-	"strings"
+    "errors"
+    "math/rand"
+    "strings"
 )
 
 var letterRunes = []rune("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
@@ -26,4 +26,13 @@ func GetFileExtension(filename string) (string, error) {
     }
 
     return filename[dotIdx+1:], nil
+}
+
+func IsStringInArray(arr []string, target string) bool {
+    for _, v := range arr {
+        if target == v {
+            return true
+        }
+    }
+    return false
 }

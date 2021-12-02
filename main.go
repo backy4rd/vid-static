@@ -28,12 +28,21 @@ func makeStaticFolders() {
 func main() {
     rand.Seed(time.Now().UnixNano())
     makeStaticFolders()
-    router := gin.New()
+    appEnv := os.Getenv("APP_ENV")
+    port := os.Getenv("PORT")
+
+    var router *gin.Engine;
+    if (appEnv == "production") {
+        router = gin.New()
+    } else {
+        router = gin.Default()
+    }
 
     router.POST("/avatars", handler.UploadAvatarHandler)
     router.POST("/banners", handler.UploadBannerHandler)
     router.POST("/thumbnails", handler.UploadThumbnailHandler)
     router.POST("/videos", handler.UploadVideoHandler)
+    router.PATCH("/videos/:filename", handler.ProcessVideoHandler)
 
     router.DELETE("/photos/:filename", handler.RemovePhotoHandler)
     router.DELETE("/thumbnails/:filename", handler.RemoveThumbnailHandler)
@@ -41,7 +50,6 @@ func main() {
 
     router.Static("/", "./static");
 
-    port := os.Getenv("PORT")
     if (port == "") {
         port = "8080"
     }
