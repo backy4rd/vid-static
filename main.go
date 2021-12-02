@@ -28,15 +28,9 @@ func makeStaticFolders() {
 func main() {
     rand.Seed(time.Now().UnixNano())
     makeStaticFolders()
-    appEnv := os.Getenv("APP_ENV")
     port := os.Getenv("PORT")
 
-    var router *gin.Engine;
-    if (appEnv == "production") {
-        router = gin.New()
-    } else {
-        router = gin.Default()
-    }
+    router := gin.Default()
 
     router.POST("/avatars", handler.UploadAvatarHandler)
     router.POST("/banners", handler.UploadBannerHandler)

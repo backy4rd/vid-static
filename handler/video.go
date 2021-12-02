@@ -75,9 +75,6 @@ func ProcessVideoHandler(c *gin.Context) {
     }
     seek, err := strconv.Atoi(_seek)
     if _seek != "" && err != nil {
-        util.SendFailMessage(c, "invalid parameters");
-        return
-    } else {
         seek = duration / 2
     }
     if seek > duration {
