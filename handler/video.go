@@ -64,8 +64,7 @@ func ProcessVideoHandler(c *gin.Context) {
     _video := c.Param("filename")
     _seek := c.PostForm("seek")
 
-    seek, err := strconv.Atoi(_seek)
-    if _video == "" || err != nil {
+    if _video == "" {
         util.SendFailMessage(c, "missing parameters");
         return
     }
@@ -73,6 +72,13 @@ func ProcessVideoHandler(c *gin.Context) {
     if err != nil {
         util.SendFailMessage(c, "video not found");
         return
+    }
+    seek, err := strconv.Atoi(_seek)
+    if _seek != "" && err != nil {
+        util.SendFailMessage(c, "invalid parameters");
+        return
+    } else {
+        seek = duration / 2
     }
     if seek > duration {
         util.SendFailMessage(c, "seek cannot greater than video duration");
