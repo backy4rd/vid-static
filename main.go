@@ -1,13 +1,13 @@
 package main
 
 import (
-	"math/rand"
-	"os"
-	"time"
+    "math/rand"
+    "os"
+    "time"
 
-	"github.com/backy4rd/zootube-media/handler"
+    "github.com/backy4rd/zootube-media/handler"
 
-	"github.com/gin-gonic/gin"
+    "github.com/gin-gonic/gin"
 )
 
 func makeStaticFolders() {
@@ -23,6 +23,14 @@ func makeStaticFolders() {
     if err != nil {
         panic("make static folders getting error")
     }
+    err = os.MkdirAll("./temp/videos", 0777)
+    if err != nil {
+        panic("make static folders getting error")
+    }
+    err = os.MkdirAll("./temp/photos", 0777)
+    if err != nil {
+        panic("make static folders getting error")
+    }
 }
 
 func main() {
@@ -32,11 +40,13 @@ func main() {
 
     router := gin.Default()
 
-    router.POST("/avatars", handler.UploadAvatarHandler)
-    router.POST("/banners", handler.UploadBannerHandler)
-    router.POST("/thumbnails", handler.UploadThumbnailHandler)
+    router.POST("/photos", handler.UploadPhotoHandler)
     router.POST("/videos", handler.UploadVideoHandler)
+
+    router.PATCH("/thumbnails/:filename", handler.ProcessThumbnailHandler)
     router.PATCH("/videos/:filename", handler.ProcessVideoHandler)
+    router.PATCH("/avatars/:filename", handler.ProcessAvatarHandler)
+    router.PATCH("/banners/:filename", handler.ProcessBannerHandler)
 
     router.DELETE("/photos/:filename", handler.RemovePhotoHandler)
     router.DELETE("/thumbnails/:filename", handler.RemoveThumbnailHandler)

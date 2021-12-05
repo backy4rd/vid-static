@@ -1,79 +1,49 @@
 package handler
 
 import (
-	"net/http"
-	"os"
-	"strings"
+    "net/http"
+    "os"
 
-	"github.com/backy4rd/zootube-media/util"
-	"github.com/disintegration/imaging"
-	"github.com/gin-gonic/gin"
+    "github.com/backy4rd/zootube-media/util"
+    "github.com/disintegration/imaging"
+    "github.com/gin-gonic/gin"
 )
 
 const thumbnailHeight = 160
 
 func RemoveThumbnailHandler(c *gin.Context) {
     filename := c.Param("filename")
-    err := os.Remove("./static/thumbnails/" + filename)
+    os.Remove("./static/thumbnails/" + filename)
 
-    if (err == nil) {
-        c.Writer.WriteHeader(200)
-    } else {
-        c.Writer.WriteHeader(400)
-    }
+    c.Writer.WriteHeader(204)
 }
 
-func UploadThumbnailHandler(c *gin.Context) {
-    _thumbnail, _ := c.FormFile("thumbnail")
+func ProcessThumbnailHandler(c *gin.Context) {
+    _thumbnailFileName := c.Param("filename")
 
-    if _thumbnail == nil {
-        c.JSON(http.StatusBadRequest, gin.H{
-            "error": gin.H{
-                "message": "missing thumbnail",
-            },
-        })
-        return
-    }
-    if !strings.HasPrefix(_thumbnail.Header.Get("Content-Type"), "image") {
-        c.JSON(http.StatusBadRequest, gin.H{
-            "error": gin.H{
-                "message": "thumbnail is not an image",
-            },
-        })
+    thumbnailPath := "./temp/photos/" + _thumbnailFileName
+    resizedThumbnailPath := "./static/thumbnails/" + _thumbnailFileName
+    if !util.IsFileExist(thumbnailPath) {
+        util.SendFailMessage(c, "thumbnail not found")
         return
     }
 
-    tempFilename := util.GenerateRandomString(32) + _thumbnail.Filename
-    thumbnailFilename := util.GenerateRandomString(32) + ".jpg"
-    tempPath := "./temp/" + tempFilename
-    thumbnailPath := "./static/thumbnails/" + thumbnailFilename
-
-    c.SaveUploadedFile(_thumbnail, tempPath)
-    defer os.Remove("./temp/" + tempFilename);
-
-    thumbnail, err := imaging.Open(tempPath)
+    thumbnail, err := imaging.Open(thumbnailPath)
     if err != nil {
-        c.JSON(http.StatusBadRequest, gin.H{
-            "error": gin.H{
-                "message": "error occur while opening thumbnail",
-            },
-        })
+        util.SendFailMessage(c, "error occur while opening thumbnail")
         return
     }
     thumbnail = imaging.Resize(thumbnail, 0, thumbnailHeight, imaging.Lanczos)
-    err = imaging.Save(thumbnail, thumbnailPath)
+    err = imaging.Save(thumbnail, resizedThumbnailPath)
     if err != nil {
-        c.JSON(http.StatusBadRequest, gin.H{
-            "error": gin.H{
-                "message": "error occur while cropping thumbnail",
-            },
-        })
+        util.SendFailMessage(c, "error occur while cropping thumbnail")
         return
     }
+    os.Remove(thumbnailPath)
 
     c.JSON(http.StatusOK, gin.H{
         "data": gin.H{
-            "thumbnailPath": "/thumbnails/" + thumbnailFilename,
+            "thumbnailPath": "/thumbnails/" + _thumbnailFileName,
         },
     })
 }

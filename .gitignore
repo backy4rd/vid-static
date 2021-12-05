@@ -1,5 +1,4 @@
 vendor/
 static/
 media/
-temp/*
-!temp/.gitkeep
+temp/

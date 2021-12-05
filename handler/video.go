@@ -4,7 +4,6 @@ import (
 	"net/http"
 	"os"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/backy4rd/zootube-media/util"
@@ -13,16 +12,13 @@ import (
 )
 
 var acceptedVideoExtensions = []string { "mp4", "mkv", "webm" }
+var acceptedVideoMimetypes = []string { "video/x-matroska", "video/mp4", "video/webm" }
 
 func RemoveVideoHandler(c *gin.Context) {
     filename := c.Param("filename")
-    err := os.Remove("./static/videos/" + filename)
+    os.Remove("./static/videos/" + filename)
 
-    if (err == nil) {
-        c.Writer.WriteHeader(200)
-    } else {
-        c.Writer.WriteHeader(400)
-    }
+    c.Writer.WriteHeader(204)
 }
 
 func UploadVideoHandler(c *gin.Context) {
@@ -32,8 +28,8 @@ func UploadVideoHandler(c *gin.Context) {
         util.SendFailMessage(c, "missing video");
         return
     }
-    if !strings.HasPrefix(_video.Header.Get("Content-Type"), "video") {
-        util.SendFailMessage(c, "video is not an video");
+    if !util.IsStringInArray(acceptedVideoMimetypes, _video.Header.Get("Content-Type")) {
+        util.SendFailMessage(c, "video type is not accepted");
         return
     }
     videoExtension, err := util.GetFileExtension(_video.Filename)
@@ -47,7 +43,7 @@ func UploadVideoHandler(c *gin.Context) {
     }
 
     videoFilename := util.GenerateRandomString(32) + "." + videoExtension
-    videoPath := "./temp/" + videoFilename
+    videoPath := "./temp/videos/" + videoFilename
     c.SaveUploadedFile(_video, videoPath)
     time.AfterFunc(time.Hour, func() {
         os.Remove(videoPath)
@@ -68,7 +64,7 @@ func ProcessVideoHandler(c *gin.Context) {
         util.SendFailMessage(c, "missing parameters");
         return
     }
-    duration, err := util.GetVideoDuration("./temp/" + _video);
+    duration, err := util.GetVideoDuration("./temp/videos/" + _video);
     if err != nil {
         util.SendFailMessage(c, "video not found");
         return
@@ -81,7 +77,7 @@ func ProcessVideoHandler(c *gin.Context) {
         util.SendFailMessage(c, "seek cannot greater than video duration");
         return
     }
-    err = util.MoveFile("./temp/" + _video, "./static/videos/" + _video);
+    err = util.MoveFile("./temp/videos/" + _video, "./static/videos/" + _video);
     if err != nil {
         util.SendFailMessage(c, "video not found");
         return
