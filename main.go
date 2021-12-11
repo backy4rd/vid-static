@@ -1,13 +1,13 @@
 package main
 
 import (
-    "math/rand"
-    "os"
-    "time"
+	"math/rand"
+	"os"
+	"time"
 
-    "github.com/backy4rd/zootube-media/handler"
+	"github.com/backy4rd/zootube-media/handler"
 
-    "github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin"
 )
 
 func makeStaticFolders() {
@@ -58,5 +58,6 @@ func main() {
         port = "8080"
     }
 
+    handler.CompressQueue.Run()
     router.Run(":" + port)
 }

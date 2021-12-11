@@ -1,7 +1,9 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
+	"net/url"
 	"os"
 	"strconv"
 	"time"
@@ -13,6 +15,9 @@ import (
 
 var acceptedVideoExtensions = []string { "mp4", "mkv", "webm" }
 var acceptedVideoMimetypes = []string { "video/x-matroska", "video/mp4", "video/webm" }
+
+var CompressQueue = util.NewTaskQueue()
+var API_SERVER_ENDPOINT = os.Getenv("API_SERVER_ENDPOINT")
 
 func RemoveVideoHandler(c *gin.Context) {
     filename := c.Param("filename")
@@ -59,8 +64,9 @@ func UploadVideoHandler(c *gin.Context) {
 func ProcessVideoHandler(c *gin.Context) {
     _video := c.Param("filename")
     _seek := c.PostForm("seek")
+    _id := c.PostForm("video_id")
 
-    if _video == "" {
+    if _video == "" || _id == "" {
         util.SendFailMessage(c, "missing parameters");
         return
     }
@@ -82,17 +88,40 @@ func ProcessVideoHandler(c *gin.Context) {
         util.SendFailMessage(c, "video not found");
         return
     }
+    quality, err := util.GetVideoQuality("./static/videos/" + _video);
+    if err != nil {
+        util.SendFailMessage(c, "video not found");
+        return
+    }
 
     thumbnailFilename := util.GenerateRandomString(32) + ".jpg"
     thumbnailPath := "./static/thumbnails/" + thumbnailFilename
     util.ExtractFrame("./static/videos/" + _video, seek, thumbnailHeight, thumbnailPath)
 
-
     c.JSON(http.StatusOK, gin.H{
         "data": gin.H{
-            "videoPath": "/videos/" + _video,
+            "video" + strconv.Itoa(quality) + "Path": "/videos/" + _video,
             "thumbnailPath": "/thumbnails/" + thumbnailFilename,
             "duration": duration,
         },
+    })
+
+    go CompressQueue.Push(func() {
+        compressedFilename := util.GenerateRandomString(32) + ".mp4"
+        compressedPath := "./static/videos/" + compressedFilename
+        err := util.Compress360p("./static/videos/" + _video, compressedPath)
+        if err != nil {
+            fmt.Println(err)
+            return
+        }
+
+        body := url.Values{}
+        body.Add("video360Path", "/videos/" + compressedFilename)
+        endpoint := API_SERVER_ENDPOINT + "/videos/" + _id + "/qualities"
+
+        _, err = http.PostForm(endpoint, body);
+        if err != nil {
+            os.Remove(compressedPath);
+        }
     })
 }
