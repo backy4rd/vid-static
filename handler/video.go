@@ -76,7 +76,7 @@ func ProcessVideoHandler(c *gin.Context) {
         return
     }
     seek, err := strconv.Atoi(_seek)
-    if _seek != "" && err != nil {
+    if (_seek != "" && err != nil) || seek == 0 {
         seek = duration / 2
     }
     if seek > duration {
@@ -105,6 +105,10 @@ func ProcessVideoHandler(c *gin.Context) {
             "duration": duration,
         },
     })
+
+    if (quality == 360) {
+        return;
+    }
 
     go CompressQueue.Push(func() {
         compressedFilename := util.GenerateRandomString(32) + ".mp4"

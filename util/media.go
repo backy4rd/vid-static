@@ -43,6 +43,7 @@ func Compress360p(input string, dest string) (error) {
         "-c:a", "copy",
         "-c:v", "libx264",
         "-vf", "scale=-2:360",
+        "-b:v", "600k",
         "-preset", "ultrafast",
         "-strict", "-2",
         dest,
